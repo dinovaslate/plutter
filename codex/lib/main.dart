@@ -144,38 +144,43 @@ class _AuthPageState extends State<AuthPage>
 
   @override
   Widget build(BuildContext context) {
+    final mediaQuery = MediaQuery.of(context);
+
     return Scaffold(
-      body: AnimatedBuilder(
-        animation: _hueController,
-        builder: (context, child) {
-          return Stack(
-            fit: StackFit.expand,
-            children: [
-              _AnimatedBackdrop(hue: _isLogin ? 0 : 0.6, progress: _hueController.value),
-              child!,
-            ],
-          );
-        },
-        child: LayoutBuilder(
-          builder: (context, constraints) {
-            final isWide = constraints.maxWidth > 900;
-            return Center(
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 1100),
-                child: Card(
-                  elevation: 0,
-                  color: Colors.white.withOpacity(0.88),
-                  shadowColor: Colors.black12,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(32),
-                  ),
-                  child: AnimatedContainer(
-                    duration: const Duration(milliseconds: 500),
-                    padding: EdgeInsets.symmetric(
-                      vertical: isWide ? 48 : 32,
-                      horizontal: isWide ? 64 : 28,
+      body: SafeArea(
+        child: AnimatedBuilder(
+          animation: _hueController,
+          builder: (context, child) {
+            return Stack(
+              fit: StackFit.expand,
+              children: [
+                _AnimatedBackdrop(hue: _isLogin ? 0 : 0.6, progress: _hueController.value),
+                child!,
+              ],
+            );
+          },
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              final isWide =
+                  constraints.maxWidth > 900 && constraints.maxHeight > 720;
+
+              return Center(
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 1100),
+                  child: Card(
+                    elevation: 0,
+                    color: Colors.white.withOpacity(0.88),
+                    shadowColor: Colors.black12,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(32),
                     ),
-                    child: isWide
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 500),
+                      padding: EdgeInsets.symmetric(
+                        vertical: isWide ? 48 : 32,
+                        horizontal: isWide ? 64 : 28,
+                      ),
+                      child: isWide
                         ? Row(
                             children: [
                               Expanded(
@@ -194,7 +199,12 @@ class _AuthPageState extends State<AuthPage>
                                 child: LayoutBuilder(
                                   builder: (context, formConstraints) {
                                     return SingleChildScrollView(
-                                      padding: const EdgeInsets.symmetric(vertical: 12),
+                                      padding: EdgeInsets.fromLTRB(
+                                        0,
+                                        12,
+                                        0,
+                                        12 + mediaQuery.viewInsets.bottom,
+                                      ),
                                       child: ConstrainedBox(
                                         constraints: BoxConstraints(
                                           minHeight: formConstraints.maxHeight,
@@ -222,7 +232,9 @@ class _AuthPageState extends State<AuthPage>
                             ],
                           )
                         : SingleChildScrollView(
-                            padding: const EdgeInsets.only(bottom: 16),
+                            padding: EdgeInsets.only(
+                              bottom: 16 + mediaQuery.viewInsets.bottom,
+                            ),
                             child: Column(
                               mainAxisSize: MainAxisSize.min,
                               crossAxisAlignment: CrossAxisAlignment.stretch,
