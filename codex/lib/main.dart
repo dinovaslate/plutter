@@ -1,6 +1,8 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:ui';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
@@ -340,7 +342,7 @@ class _GlowingOrb extends StatelessWidget {
   }
 }
 
-class _IllustrationPanel extends StatelessWidget {
+class _IllustrationPanel extends StatefulWidget {
   const _IllustrationPanel({
     super.key,
     required this.isLogin,
@@ -351,40 +353,193 @@ class _IllustrationPanel extends StatelessWidget {
   final bool compact;
 
   @override
+  State<_IllustrationPanel> createState() => _IllustrationPanelState();
+}
+
+class _HeroSlideData {
+  const _HeroSlideData({
+    required this.icon,
+    required this.title,
+    required this.caption,
+  });
+
+  final IconData icon;
+  final String title;
+  final String caption;
+}
+
+const List<_HeroSlideData> _loginSlides = [
+  _HeroSlideData(
+    icon: Icons.auto_graph_outlined,
+    title: 'Track your progress',
+    caption: 'Review insights from your recent activity at a glance.',
+  ),
+  _HeroSlideData(
+    icon: Icons.bolt_outlined,
+    title: 'Quick actions',
+    caption: 'Jump right back into drafts, favourites, and saved sessions.',
+  ),
+  _HeroSlideData(
+    icon: Icons.chat_bubble_outline,
+    title: 'Real-time support',
+    caption: 'Get assistance instantly with in-app messaging and tips.',
+  ),
+];
+
+const List<_HeroSlideData> _registerSlides = [
+  _HeroSlideData(
+    icon: Icons.rocket_launch_outlined,
+    title: 'Launch your journey',
+    caption: 'Create an account to unlock personalised recommendations.',
+  ),
+  _HeroSlideData(
+    icon: Icons.group_outlined,
+    title: 'Join the community',
+    caption: 'Collaborate with peers and share progress with your team.',
+  ),
+  _HeroSlideData(
+    icon: Icons.lock_reset_outlined,
+    title: 'Stay secure',
+    caption: 'Your data is protected with multi-layer authentication.',
+  ),
+];
+
+class _IllustrationPanelState extends State<_IllustrationPanel> {
+  late final PageController _pageController = PageController();
+  Timer? _timer;
+  int _currentIndex = 0;
+
+  List<_HeroSlideData> get _slides => widget.isLogin ? _loginSlides : _registerSlides;
+
+  @override
+  void initState() {
+    super.initState();
+    _restartTimer();
+  }
+
+  @override
+  void didUpdateWidget(covariant _IllustrationPanel oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.isLogin != widget.isLogin) {
+      if (_pageController.hasClients) {
+        _pageController.jumpToPage(0);
+      } else {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted && _pageController.hasClients) {
+            _pageController.jumpToPage(0);
+          }
+        });
+      }
+      _restartTimer();
+      setState(() {
+        _currentIndex = 0;
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    _pageController.dispose();
+    super.dispose();
+  }
+
+  void _restartTimer() {
+    _timer?.cancel();
+    if (_slides.length < 2) {
+      return;
+    }
+    _timer = Timer.periodic(const Duration(seconds: 5), (_) {
+      if (!mounted || !_pageController.hasClients) {
+        return;
+      }
+      final nextIndex = (_currentIndex + 1) % _slides.length;
+      _pageController.animateToPage(
+        nextIndex,
+        duration: const Duration(milliseconds: 600),
+        curve: Curves.easeInOut,
+      );
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final palette = theme.colorScheme;
-    final heroColor = isLogin ? palette.primary : palette.tertiary;
-    final title = isLogin ? 'Welcome Back' : 'Create Account';
-    final subtitle = isLogin
+    final heroColor = widget.isLogin ? palette.primary : palette.tertiary;
+    final title = widget.isLogin ? 'Welcome Back' : 'Create Account';
+    final subtitle = widget.isLogin
         ? 'Access your personalised dashboard and stay on top of your goals.'
         : 'Join the community to save favourites, sync across devices, and more.';
 
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment:
-          compact ? CrossAxisAlignment.center : CrossAxisAlignment.start,
+          widget.compact ? CrossAxisAlignment.center : CrossAxisAlignment.start,
       children: [
         AnimatedContainer(
           duration: const Duration(milliseconds: 600),
           curve: Curves.easeOutQuad,
-          height: compact ? 220 : 280,
+          height: widget.compact ? 220 : 280,
           decoration: BoxDecoration(
             color: heroColor.withOpacity(0.12),
             borderRadius: BorderRadius.circular(28),
           ),
+          clipBehavior: Clip.antiAlias,
           child: CustomPaint(
             painter: _TopoPainter(color: heroColor.withOpacity(0.25)),
             child: Stack(
               fit: StackFit.expand,
               children: [
-                Align(
-                  alignment: Alignment.center,
-                  child: Icon(
-                    isLogin ? Icons.auto_awesome : Icons.rocket_launch_outlined,
-                    color: heroColor,
-                    size: compact ? 120 : 160,
-                  ),
+                PageView.builder(
+                  controller: _pageController,
+                  physics: const BouncingScrollPhysics(),
+                  onPageChanged: (index) {
+                    if (!mounted) {
+                      return;
+                    }
+                    setState(() {
+                      _currentIndex = index;
+                    });
+                    _restartTimer();
+                  },
+                  itemCount: _slides.length,
+                  itemBuilder: (context, index) {
+                    final slide = _slides[index];
+                    return Padding(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: widget.compact ? 24 : 32,
+                        vertical: widget.compact ? 24 : 32,
+                      ),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            slide.icon,
+                            color: heroColor,
+                            size: widget.compact ? 96 : 140,
+                          ),
+                          SizedBox(height: widget.compact ? 18 : 24),
+                          Text(
+                            slide.title,
+                            textAlign: TextAlign.center,
+                            style: theme.textTheme.titleMedium?.copyWith(
+                              color: palette.primary,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            slide.caption,
+                            textAlign: TextAlign.center,
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              color: palette.onSurface.withOpacity(0.7),
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
                 ),
                 Positioned(
                   left: 0,
@@ -393,15 +548,15 @@ class _IllustrationPanel extends StatelessWidget {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: List.generate(
-                      4,
+                      _slides.length,
                       (index) => AnimatedContainer(
                         duration: const Duration(milliseconds: 500),
                         margin: const EdgeInsets.symmetric(horizontal: 6),
                         height: 6,
-                        width: compact ? 24 : 32,
+                        width: widget.compact ? 24 : 32,
                         decoration: BoxDecoration(
                           color: heroColor.withOpacity(
-                            isLogin == (index.isEven) ? 0.8 : 0.2,
+                            index == _currentIndex ? 0.9 : 0.25,
                           ),
                           borderRadius: BorderRadius.circular(4),
                         ),
@@ -420,7 +575,7 @@ class _IllustrationPanel extends StatelessWidget {
             color: palette.primary,
             fontWeight: FontWeight.w700,
           ),
-          textAlign: compact ? TextAlign.center : TextAlign.start,
+          textAlign: widget.compact ? TextAlign.center : TextAlign.start,
         ),
         const SizedBox(height: 12),
         Text(
@@ -428,7 +583,7 @@ class _IllustrationPanel extends StatelessWidget {
           style: theme.textTheme.bodyLarge?.copyWith(
             color: palette.onSurface.withOpacity(0.7),
           ),
-          textAlign: compact ? TextAlign.center : TextAlign.start,
+          textAlign: widget.compact ? TextAlign.center : TextAlign.start,
         ),
       ],
     );
@@ -646,8 +801,29 @@ class _TopoPainter extends CustomPainter {
   bool shouldRepaint(covariant _TopoPainter oldDelegate) => oldDelegate.color != color;
 }
 
+class ApiConfig {
+  const ApiConfig._();
+
+  static String get authBaseUrl {
+    if (kIsWeb) {
+      return 'http://localhost:8000/api/auth';
+    }
+
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.android:
+        return 'http://10.0.2.2:8000/api/auth';
+      case TargetPlatform.iOS:
+      case TargetPlatform.macOS:
+      case TargetPlatform.windows:
+      case TargetPlatform.linux:
+      case TargetPlatform.fuchsia:
+        return 'http://localhost:8000/api/auth';
+    }
+  }
+}
+
 class AuthService {
-  static const String baseUrl = 'http://localhost:8000/api/auth';
+  static String get baseUrl => ApiConfig.authBaseUrl;
 
   static Map<String, String> _headers() => {
         'Content-Type': 'application/json',
