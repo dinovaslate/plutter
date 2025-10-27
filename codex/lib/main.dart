@@ -150,51 +150,101 @@ class _AuthPageState extends State<AuthPage>
       body: SafeArea(
         child: AnimatedBuilder(
           animation: _hueController,
-          builder: (context, _) {
+          builder: (context, child) {
             return Stack(
               fit: StackFit.expand,
               children: [
-                _AnimatedBackdrop(
-                  hue: _isLogin ? 0 : 0.6,
-                  progress: _hueController.value,
-                ),
-                LayoutBuilder(
-                  builder: (context, constraints) {
-                    final isWide =
-                        constraints.maxWidth > 900 && constraints.maxHeight > 720;
+                _AnimatedBackdrop(hue: _isLogin ? 0 : 0.6, progress: _hueController.value),
+                child!,
+              ],
+            );
+          },
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              final isWide =
+                  constraints.maxWidth > 900 && constraints.maxHeight > 720;
 
-                    return Center(
-                      child: ConstrainedBox(
-                        constraints: const BoxConstraints(maxWidth: 1100),
-                        child: Card(
-                          elevation: 0,
-                          color: Colors.white.withOpacity(0.88),
-                          shadowColor: Colors.black12,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(32),
-                          ),
-                          child: AnimatedContainer(
-                            duration: const Duration(milliseconds: 500),
-                            padding: EdgeInsets.symmetric(
-                              vertical: isWide ? 48 : 32,
-                              horizontal: isWide ? 64 : 28,
-                            ),
-                            child: isWide
-                                ? _WideAuthContent(
+              return Center(
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 1100),
+                  child: Card(
+                    elevation: 0,
+                    color: Colors.white.withOpacity(0.88),
+                    shadowColor: Colors.black12,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(32),
+                    ),
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 500),
+                      padding: EdgeInsets.symmetric(
+                        vertical: isWide ? 48 : 32,
+                        horizontal: isWide ? 64 : 28,
+                      ),
+                      child: isWide
+                        ? Row(
+                            children: [
+                              Expanded(
+                                child: AnimatedSwitcher(
+                                  duration: const Duration(milliseconds: 600),
+                                  transitionBuilder: (child, animation) =>
+                                      FadeTransition(opacity: animation, child: child),
+                                  child: _IllustrationPanel(
+                                    key: ValueKey(_isLogin),
                                     isLogin: _isLogin,
-                                    loginFormKey: _loginFormKey,
-                                    registerFormKey: _registerFormKey,
-                                    emailController: _emailController,
-                                    passwordController: _passwordController,
-                                    nameController: _nameController,
-                                    confirmPasswordController:
-                                        _confirmPasswordController,
-                                    onSubmit: _submit,
-                                    onToggle: _toggleMode,
-                                    isSubmitting: _isSubmitting,
-                                    keyboardInset: mediaQuery.viewInsets.bottom,
-                                  )
-                                : _CompactAuthContent(
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 56),
+                              Expanded(
+                                child: LayoutBuilder(
+                                  builder: (context, formConstraints) {
+                                    return SingleChildScrollView(
+                                      padding: EdgeInsets.fromLTRB(
+                                        0,
+                                        12,
+                                        0,
+                                        12 + mediaQuery.viewInsets.bottom,
+                                      ),
+                                      child: ConstrainedBox(
+                                        constraints: BoxConstraints(
+                                          minHeight: formConstraints.maxHeight,
+                                        ),
+                                        child: Align(
+                                          alignment: Alignment.topCenter,
+                                          child: _AuthForm(
+                                            isLogin: _isLogin,
+                                            loginFormKey: _loginFormKey,
+                                            registerFormKey: _registerFormKey,
+                                            emailController: _emailController,
+                                            passwordController: _passwordController,
+                                            nameController: _nameController,
+                                            confirmPasswordController: _confirmPasswordController,
+                                            onSubmit: _submit,
+                                            onToggle: _toggleMode,
+                                            isSubmitting: _isSubmitting,
+                                          ),
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                ),
+                              ),
+                            ],
+                          )
+                        : SingleChildScrollView(
+                            padding: EdgeInsets.only(
+                              bottom: 16 + mediaQuery.viewInsets.bottom,
+                            ),
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: [
+                                AnimatedSwitcher(
+                                  duration: const Duration(milliseconds: 600),
+                                  transitionBuilder: (child, animation) =>
+                                      FadeTransition(opacity: animation, child: child),
+                                  child: _IllustrationPanel(
+                                    key: ValueKey(_isLogin),
                                     isLogin: _isLogin,
                                     loginFormKey: _loginFormKey,
                                     registerFormKey: _registerFormKey,
