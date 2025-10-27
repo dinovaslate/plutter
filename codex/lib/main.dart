@@ -246,31 +246,174 @@ class _AuthPageState extends State<AuthPage>
                                   child: _IllustrationPanel(
                                     key: ValueKey(_isLogin),
                                     isLogin: _isLogin,
-                                    compact: true,
+                                    loginFormKey: _loginFormKey,
+                                    registerFormKey: _registerFormKey,
+                                    emailController: _emailController,
+                                    passwordController: _passwordController,
+                                    nameController: _nameController,
+                                    confirmPasswordController:
+                                        _confirmPasswordController,
+                                    onSubmit: _submit,
+                                    onToggle: _toggleMode,
+                                    isSubmitting: _isSubmitting,
+                                    keyboardInset: mediaQuery.viewInsets.bottom,
                                   ),
-                                ),
-                                const SizedBox(height: 32),
-                                _AuthForm(
-                                  isLogin: _isLogin,
-                                  loginFormKey: _loginFormKey,
-                                  registerFormKey: _registerFormKey,
-                                  emailController: _emailController,
-                                  passwordController: _passwordController,
-                                  nameController: _nameController,
-                                  confirmPasswordController: _confirmPasswordController,
-                                  onSubmit: _submit,
-                                  onToggle: _toggleMode,
-                                  isSubmitting: _isSubmitting,
-                                ),
-                              ],
-                            ),
                           ),
-                  ),
+                        ),
+                      ),
+                    );
+                  },
                 ),
-              ),
+              ],
             );
           },
         ),
+      ),
+    );
+  }
+}
+
+class _WideAuthContent extends StatelessWidget {
+  const _WideAuthContent({
+    required this.isLogin,
+    required this.loginFormKey,
+    required this.registerFormKey,
+    required this.emailController,
+    required this.passwordController,
+    required this.nameController,
+    required this.confirmPasswordController,
+    required this.onSubmit,
+    required this.onToggle,
+    required this.isSubmitting,
+    required this.keyboardInset,
+  });
+
+  final bool isLogin;
+  final GlobalKey<FormState> loginFormKey;
+  final GlobalKey<FormState> registerFormKey;
+  final TextEditingController emailController;
+  final TextEditingController passwordController;
+  final TextEditingController nameController;
+  final TextEditingController confirmPasswordController;
+  final Future<void> Function() onSubmit;
+  final VoidCallback onToggle;
+  final bool isSubmitting;
+  final double keyboardInset;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Expanded(
+          child: AnimatedSwitcher(
+            duration: const Duration(milliseconds: 600),
+            transitionBuilder: (child, animation) =>
+                FadeTransition(opacity: animation, child: child),
+            child: _IllustrationPanel(
+              key: ValueKey(isLogin),
+              isLogin: isLogin,
+            ),
+          ),
+        ),
+        const SizedBox(width: 56),
+        Expanded(
+          child: LayoutBuilder(
+            builder: (context, formConstraints) {
+              return SingleChildScrollView(
+                padding: EdgeInsets.fromLTRB(
+                  0,
+                  12,
+                  0,
+                  12 + keyboardInset,
+                ),
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(
+                    minHeight: formConstraints.maxHeight,
+                  ),
+                  child: Align(
+                    alignment: Alignment.topCenter,
+                    child: _AuthForm(
+                      isLogin: isLogin,
+                      loginFormKey: loginFormKey,
+                      registerFormKey: registerFormKey,
+                      emailController: emailController,
+                      passwordController: passwordController,
+                      nameController: nameController,
+                      confirmPasswordController: confirmPasswordController,
+                      onSubmit: onSubmit,
+                      onToggle: onToggle,
+                      isSubmitting: isSubmitting,
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _CompactAuthContent extends StatelessWidget {
+  const _CompactAuthContent({
+    required this.isLogin,
+    required this.loginFormKey,
+    required this.registerFormKey,
+    required this.emailController,
+    required this.passwordController,
+    required this.nameController,
+    required this.confirmPasswordController,
+    required this.onSubmit,
+    required this.onToggle,
+    required this.isSubmitting,
+    required this.keyboardInset,
+  });
+
+  final bool isLogin;
+  final GlobalKey<FormState> loginFormKey;
+  final GlobalKey<FormState> registerFormKey;
+  final TextEditingController emailController;
+  final TextEditingController passwordController;
+  final TextEditingController nameController;
+  final TextEditingController confirmPasswordController;
+  final Future<void> Function() onSubmit;
+  final VoidCallback onToggle;
+  final bool isSubmitting;
+  final double keyboardInset;
+
+  @override
+  Widget build(BuildContext context) {
+    return SingleChildScrollView(
+      padding: EdgeInsets.only(bottom: 16 + keyboardInset),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          AnimatedSwitcher(
+            duration: const Duration(milliseconds: 600),
+            transitionBuilder: (child, animation) =>
+                FadeTransition(opacity: animation, child: child),
+            child: _IllustrationPanel(
+              key: ValueKey(isLogin),
+              isLogin: isLogin,
+              compact: true,
+            ),
+          ),
+          const SizedBox(height: 32),
+          _AuthForm(
+            isLogin: isLogin,
+            loginFormKey: loginFormKey,
+            registerFormKey: registerFormKey,
+            emailController: emailController,
+            passwordController: passwordController,
+            nameController: nameController,
+            confirmPasswordController: confirmPasswordController,
+            onSubmit: onSubmit,
+            onToggle: onToggle,
+            isSubmitting: isSubmitting,
+          ),
+        ],
       ),
     );
   }
