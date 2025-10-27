@@ -191,17 +191,32 @@ class _AuthPageState extends State<AuthPage>
                               ),
                               const SizedBox(width: 56),
                               Expanded(
-                                child: _AuthForm(
-                                  isLogin: _isLogin,
-                                  loginFormKey: _loginFormKey,
-                                  registerFormKey: _registerFormKey,
-                                  emailController: _emailController,
-                                  passwordController: _passwordController,
-                                  nameController: _nameController,
-                                  confirmPasswordController: _confirmPasswordController,
-                                  onSubmit: _submit,
-                                  onToggle: _toggleMode,
-                                  isSubmitting: _isSubmitting,
+                                child: LayoutBuilder(
+                                  builder: (context, formConstraints) {
+                                    return SingleChildScrollView(
+                                      padding: const EdgeInsets.symmetric(vertical: 12),
+                                      child: ConstrainedBox(
+                                        constraints: BoxConstraints(
+                                          minHeight: formConstraints.maxHeight,
+                                        ),
+                                        child: Align(
+                                          alignment: Alignment.topCenter,
+                                          child: _AuthForm(
+                                            isLogin: _isLogin,
+                                            loginFormKey: _loginFormKey,
+                                            registerFormKey: _registerFormKey,
+                                            emailController: _emailController,
+                                            passwordController: _passwordController,
+                                            nameController: _nameController,
+                                            confirmPasswordController: _confirmPasswordController,
+                                            onSubmit: _submit,
+                                            onToggle: _toggleMode,
+                                            isSubmitting: _isSubmitting,
+                                          ),
+                                        ),
+                                      ),
+                                    );
+                                  },
                                 ),
                               ),
                             ],
