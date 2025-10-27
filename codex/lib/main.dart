@@ -206,33 +206,37 @@ class _AuthPageState extends State<AuthPage>
                               ),
                             ],
                           )
-                        : Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              AnimatedSwitcher(
-                                duration: const Duration(milliseconds: 600),
-                                transitionBuilder: (child, animation) =>
-                                    FadeTransition(opacity: animation, child: child),
-                                child: _IllustrationPanel(
-                                  key: ValueKey(_isLogin),
-                                  isLogin: _isLogin,
-                                  compact: true,
+                        : SingleChildScrollView(
+                            padding: const EdgeInsets.only(bottom: 16),
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: [
+                                AnimatedSwitcher(
+                                  duration: const Duration(milliseconds: 600),
+                                  transitionBuilder: (child, animation) =>
+                                      FadeTransition(opacity: animation, child: child),
+                                  child: _IllustrationPanel(
+                                    key: ValueKey(_isLogin),
+                                    isLogin: _isLogin,
+                                    compact: true,
+                                  ),
                                 ),
-                              ),
-                              const SizedBox(height: 32),
-                              _AuthForm(
-                                isLogin: _isLogin,
-                                loginFormKey: _loginFormKey,
-                                registerFormKey: _registerFormKey,
-                                emailController: _emailController,
-                                passwordController: _passwordController,
-                                nameController: _nameController,
-                                confirmPasswordController: _confirmPasswordController,
-                                onSubmit: _submit,
-                                onToggle: _toggleMode,
-                                isSubmitting: _isSubmitting,
-                              ),
-                            ],
+                                const SizedBox(height: 32),
+                                _AuthForm(
+                                  isLogin: _isLogin,
+                                  loginFormKey: _loginFormKey,
+                                  registerFormKey: _registerFormKey,
+                                  emailController: _emailController,
+                                  passwordController: _passwordController,
+                                  nameController: _nameController,
+                                  confirmPasswordController: _confirmPasswordController,
+                                  onSubmit: _submit,
+                                  onToggle: _toggleMode,
+                                  isSubmitting: _isSubmitting,
+                                ),
+                              ],
+                            ),
                           ),
                   ),
                 ),
